@@ -6,22 +6,22 @@ InstanceType=
 SecrurityGroupId=
 InstanceName=
 InternetMaxBandwidthOut=
-Hostname=
-InternetChargeType=
-DiskSize=
-DiskCategory=
+HostName=
+InternetChargeType="PayByTraffic"
+DiskSize="40"
+DiskCategory="cloud_efficiency"
 KeyPairName=
 Amount=
-InstanceChargeType=
+InstanceChargeType="PrePaid"
 dryrun=0
 function usage() {
     cat <<HEREDOC
     Usage $(basename $0) [Options] ...
         required arguments:
-            --rid                   regionId where instances belongs to
+            --region                   regionId where instances belongs to
             --image                 imageId sepcify image to run instances with
             --type                  instanceType specify cpus and mems of the instance.for example "ecs.g6.large" means 2C8G.List avaliable instance type by --InstanceFamily
-            --sid                   securityGroupId. Don's specify this will list avaliable security group id
+            --secgroup                securityGroupId. Don's specify this will list avaliable security group id
             -n                      name of Instances.[start,bit] means "bit" length of number start from "start"fro example instancename-[0,3] means instance-000,instance-001,instance-002...instance-\$Amount
             -b                      bandwidth of instances
             --key                   KeyPair specify the publickey which will be place on your instance
@@ -36,7 +36,7 @@ function usage() {
             --DiskCategory          cloud_efficiency,cloud_dds,cloud_essd,cloud. Default cloud_efficiency
             --InstanceChargeType    PrePaid,PostPaid.Default PrePaid.
             --dryrun                debug mode
-            --rids
+            --regions
             --types
             --family
             --familys
@@ -64,17 +64,17 @@ function ParseArguments() {
     while [ $# -gt 0 ];do
         case "$1" in 
         --help)                 usage; exit ;;
-        --rid)                  shift; RegionId="$1"; shift ;;
-        --rids)                 shift; DescribeRegions; exit ;;
+        --region)               shift; RegionId="$1"; shift ;;
+        --regionss)             shift; DescribeRegions; exit ;;
         --image)                shift; ImageId="$1"; shift ;;
         --images)               shift; require "RegionId";DescribeImages; exit ;;
         --type)                 shift; InstanceType="$1"; shift;;
         --types)                shift; DescribeInstanceTypes; exit ;;
-        --secgroup)             shift; SecrurityGroupId="$1"; shift;;
+        --secgroup)             shift; SecurityGroupId="$1"; shift;;
         --secgroups)            shift; require "RegionId";DescribeSecurityGroups; exit;;
         -n)                     shift; InstanceName="$1"; shift;;
-        -b)                     shift; OutInternetMaxBandwidthOut="$1"; shift;;
-        -h)                     shift; Hostname="$1"; shift;;
+        -b)                     shift; InternetMaxBandwidthOut="$1"; shift;;
+        -h)                     shift; HostName="$1"; shift;;
         --InternetChargeType)   shift; InternetChargeType="$1"; shift;;
         --InternetChargeTypes)  shift; echo -e "PayByBandwidth按固定带宽计费\nPayByTraffic(*):按使用流量计费"; exit;;
         --DiskSize)             shift; DiskSize="$1"; shift;;
@@ -97,12 +97,12 @@ function ParseArguments() {
     require "ImageId"
     require "SecurityGroupId"
     require "InstanceName"
-    require "InternetMaxBandwidth"
+    require "InternetMaxBandwidthOut"
     require "KeyPairName"
     require "Amount"
     require "InstanceType"
-    if [ -z "$Hostname" ];then
-        Hostname="$InstanceName"
+    if [ -z "$HostName" ];then
+        HostName="$InstanceName"
     fi
 }
 
@@ -114,7 +114,7 @@ function RunInstances() {
         --SecurityGroupId "$SecurityGroupId" \
         --InstanceName  "$InstanceName" \
         --InternetMaxBandwidthOut "$InternetMaxBandwidthOut" \
-        --Hostname "$Hosrname"   \
+        --HostName "$HostName"   \
         --UniqueSuffix "true"  \
         --InternetChargeType "$InternetChargeType" \
         --SystemDisk.Size  "$DiskSize"  \
@@ -160,7 +160,14 @@ function DescribeInstanceTypes() {
     echo -e  "$types"
 }
 #function DescribeVSwitches() {}
-#function DescribeSecurityGroups() {}
+function DescribeSecurityGroups() {
+    ret=$( \
+    aliyun ecs DescribeSecurityGroups \
+        --RegionId "$RegionId" \
+    )
+    group=$(echo "$ret" |jq -r '.SecurityGroups.SecurityGroup[]|"Name:  \(.SecurityGroupName)\tID:  \(.SecurityGroupId)"')
+    echo -e "$group"
+}
 function DescribeKeyPairs() {
     ret=$( \
         aliyun ecs DescribeKeyPairs \
@@ -171,7 +178,7 @@ function DescribeKeyPairs() {
 }
 
 ParseArguments "$@"
-if [ $dryrun -eq 1];then
+if [ $dryrun -eq 1 ];then
     RunInstances --dryrun
 else
     RunInstances
