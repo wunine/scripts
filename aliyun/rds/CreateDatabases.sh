@@ -20,8 +20,7 @@ function usage() {
     optional arguments:
         -h, --help          show this help message and exit
         -a, --Archery       username of archery platform for sql review.default archery_test
-        -p, --Password      use uppercase letters,lowercase letters , numbers and +,/. default a random string of 
-                            lenth 20
+        -p, --Password      default a random string of lenth 20
         --dryrun            debug mode
 HEREDOC
 }
