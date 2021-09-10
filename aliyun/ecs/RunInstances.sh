@@ -18,13 +18,13 @@ function usage() {
     cat <<HEREDOC
     Usage $(basename $0) [Options] ...
         required arguments:
-            --region                   regionId where instances belongs to
+            --region                regionId where instances belongs to
             --image                 imageId sepcify image to run instances with
-            --type                  instanceType specify cpus and mems of the instance.for example "ecs.g6.large" means 2C8G.List avaliable instance type by --InstanceFamily
-            --secgroup                securityGroupId. Don's specify this will list avaliable security group id
-            -n                      name of Instances.[start,bit] means "bit" length of number start from "start"fro example instancename-[0,3] means instance-000,instance-001,instance-002...instance-\$Amount
+            --type                  instanceType specify cpus and mems of the instance.for example "ecs.g6.large" means 2C8G.
+            --secgroup              securityGroupId. Don's specify this will list avaliable security group id
+            -n                      instanceName.[start,bit] means "bit" length of number start from "start"fro example instancename-[0,3] means instance-000,instance-001,instance-002...instance-\$Amount
             -b                      bandwidth of instances
-            --key                   KeyPair specify the publickey which will be place on your instance
+            --key                   keyPairName specify the publickey which will be place on your instance
             -a                      amount of instances to be run
         
 
@@ -36,13 +36,13 @@ function usage() {
             --DiskCategory          cloud_efficiency,cloud_dds,cloud_essd,cloud. Default cloud_efficiency
             --InstanceChargeType    PrePaid,PostPaid.Default PrePaid.
             --dryrun                debug mode
-            --regions
-            --types
-            --family
-            --familys
-            --keys
-            --secgroups
-            --images
+            --regions               list available regionIds
+            --types                 list availiable InstanceTypesIds 
+            --family                list availiable InstanceTypesIds belongs to the InstanceTypeFamily
+            --familys               list availiable InstanceFamilies
+            --keys                  list available KeyPairNames
+            --secgroups             list available SecurityGroupsIds
+            --images                list available ImageIds
 HEREDOC
 }
 
